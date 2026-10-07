@@ -337,7 +337,8 @@ const PODESAVANJA = {
   VEZBA_SEK: 10,              // koliko se sluša u Vežbi
   TEST_SEK: 10,               // koliko se sluša u Testu
   GLASNOCA_ISPOD_GLASA: 15,   // jačina muzike (0–100) dok glas govori u Učenju
-  PAUZA_POSLE_GLASA_MS: 1200, // pauza pre sledeće kompozicije u Učenju
+  UCENJE_UKUPNO_SEK: 10,      // koliko ukupno svira jedna kompozicija u Učenju (sa najavom)
+  UCENJE_POSLE_GLASA_SEK: 2,  // muzika svira bar ovoliko posle najave, i kad je glas zakasnio
 };
 
 /* ========================================================================== */
@@ -621,6 +622,7 @@ function krajSlusanja() {
       return;
     }
     ui.najavljeno = ui.govori = true;
+    renderAnimacija();
     utisaj(PODESAVANJA.GLASNOCA_ISPOD_GLASA, g, () => {
       izgovori(k, g, () => { ui.govori = false; predjiNaSledecuUcenje(g); });
     });
@@ -632,12 +634,21 @@ function krajSlusanja() {
   renderSve();
 }
 
-// Učenje: kratka pauza posle glasa, muzika se stiša do kraja i ide sledeća kompozicija.
+// Učenje: posle najave muzika se vrati na punu jačinu i svira dok kompozicija ne navrši
+// UCENJE_UKUPNO_SEK (a bar UCENJE_POSLE_GLASA_SEK posle glasa), pa se stiša i ide sledeća.
+// Meri se vreme samog videa, kao kod tajmera, pa baferovanje ne skraćuje slušanje.
 function predjiNaSledecuUcenje(g) {
-  setTimeout(() => {
-    if (g !== gen) return;
+  renderAnimacija();
+  utisaj(100, g);
+  const vremeKlipa = () => { try { return player.getCurrentTime() - t0; } catch (e) { return Infinity; } };
+  const cilj = Math.max(PODESAVANJA.UCENJE_UKUPNO_SEK, vremeKlipa() + PODESAVANJA.UCENJE_POSLE_GLASA_SEK);
+  const rok = Date.now() + (cilj + 8) * 1000; // ako video zapne, ne čeka se zauvek
+  const id = setInterval(() => {
+    if (g !== gen) { clearInterval(id); return; }
+    if (vremeKlipa() < cilj && ytStanje !== 0 && Date.now() < rok) return;
+    clearInterval(id);
     utisaj(0, g, () => { try { player.pauseVideo(); } catch (e) { /* ništa */ } sledeca(); });
-  }, PODESAVANJA.PAUZA_POSLE_GLASA_MS);
+  }, 200);
 }
 
 // Učenje: naziv odmah, a muzika svira dalje (tiše dok glas govori) do isteka vremena.
@@ -752,7 +763,7 @@ const sekundi = n => n + (n % 10 === 1 && n % 100 !== 11 ? ' sekundu'
   : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? ' sekunde' : ' sekundi');
 
 const OPISI = {
-  ucenje: () => 'Slušaš ' + sekundi(PODESAVANJA.UCENJE_SEK) + ', a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Kompozicije idu same, jedna za drugom.',
+  ucenje: () => 'Slušaš ' + sekundi(PODESAVANJA.UCENJE_SEK) + ', a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Muzika zatim svira još malo (ukupno ' + sekundi(PODESAVANJA.UCENJE_UKUPNO_SEK) + ' po kompoziciji), pa sama ide sledeća.',
   vezba: () => 'Slušaš ' + sekundi(PODESAVANJA.VEZBA_SEK) + ' i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.',
   test: () => 'Slušaš ' + sekundi(PODESAVANJA.TEST_SEK) + ' i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
 };
@@ -826,7 +837,7 @@ const tacnoOdgovoreno = () => rezim === 'test' && ui.izabrano !== null && runda 
 function renderAnimacija() {
   const z = $('zaklon');
   z.classList.toggle('svira', uIgri() && ytStanje === 1);
-  z.classList.toggle('tiho', faza === 'glas' || ui.govori);
+  z.classList.toggle('tiho', ui.govori);
 }
 
 // Ekvilajzer: YouTube ne daje pristup samom zvuku, pa se spektar simulira. Basovi (levo)
