@@ -333,7 +333,7 @@ const KOMPOZICIJE = [
 
 /* Podešavanja (sekunde) */
 const PODESAVANJA = {
-  UCENJE_SEK: 8,              // koliko se sluša u Učenju pre nego što glas kaže naziv
+  UCENJE_SEK: 5,              // koliko se sluša u Učenju pre nego što glas kaže naziv
   VEZBA_SEK: 10,              // koliko se sluša u Vežbi
   TEST_SEK: 10,               // koliko se sluša u Testu
   GLASNOCA_ISPOD_GLASA: 15,   // jačina muzike (0–100) dok glas govori u Učenju
@@ -747,10 +747,14 @@ function napraviDugme(tekst, klasa, akcija) {
   return b;
 }
 
+// "1 sekundu", "2–4 sekunde", "5 sekundi" (i 21, 22… po istom pravilu)
+const sekundi = n => n + (n % 10 === 1 && n % 100 !== 11 ? ' sekundu'
+  : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? ' sekunde' : ' sekundi');
+
 const OPISI = {
-  ucenje: () => 'Slušaš ' + PODESAVANJA.UCENJE_SEK + ' sekundi, a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Kompozicije idu same, jedna za drugom.',
-  vezba: () => 'Slušaš ' + PODESAVANJA.VEZBA_SEK + ' sekundi i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.',
-  test: () => 'Slušaš ' + PODESAVANJA.TEST_SEK + ' sekundi i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
+  ucenje: () => 'Slušaš ' + sekundi(PODESAVANJA.UCENJE_SEK) + ', a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Kompozicije idu same, jedna za drugom.',
+  vezba: () => 'Slušaš ' + sekundi(PODESAVANJA.VEZBA_SEK) + ' i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.',
+  test: () => 'Slušaš ' + sekundi(PODESAVANJA.TEST_SEK) + ' i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
 };
 
 function renderStart() {
