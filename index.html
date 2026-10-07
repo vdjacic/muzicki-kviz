@@ -4,172 +4,214 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Muzički kviz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
   :root {
-    color-scheme: light dark;
-    --bg: #f5f4f0;
-    --kartica: #ffffff;
-    --tekst: #1d1d22;
-    --slab: #686873;
-    --linija: #e2e0da;
-    --segment: #e9e7e1;
-    --akcenat: #3949ab;
-    --akcenat-tekst: #ffffff;
-    --tacno: #1e8a4c;
-    --tacno-bg: #e2f5e9;
-    --netacno: #c93a3a;
-    --netacno-bg: #fbe6e6;
-    --upozorenje-bg: #fff4d6;
-    --upozorenje-tekst: #6b4e00;
-    --zaklon-1: #2b2f5c;
-    --zaklon-2: #15172e;
-    --senka: 0 1px 2px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.05);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #121215;
-      --kartica: #1c1c21;
-      --tekst: #ececf1;
-      --slab: #9d9daa;
-      --linija: #2f2f37;
-      --segment: #26262d;
-      --akcenat: #8c9bff;
-      --akcenat-tekst: #10122a;
-      --tacno: #55c98d;
-      --tacno-bg: #15301f;
-      --netacno: #ff8080;
-      --netacno-bg: #3a1d1d;
-      --upozorenje-bg: #3a3014;
-      --upozorenje-tekst: #f5dc8c;
-      --zaklon-1: #2a2d55;
-      --zaklon-2: #111226;
-      --senka: none;
-    }
+    color-scheme: dark;
+    --bg: #0F0F14;
+    --povrs: #1A1A22;
+    --povrs-2: #16161D;
+    --linija: #2A2A35;
+    --tekst: #F2F2F5;
+    --slab: #9A9AAE;
+    --bled: #6E6E82;
+    --akcenat: #C8FF4D;
+    --akcenat-tekst: #0F0F14;
+    --tacno: #C8FF4D;
+    --tacno-bg: #1C2410;
+    --netacno: #FF6B9D;
+    --netacno-bg: #2A1520;
+    --upozorenje-bg: #3A3014;
+    --upozorenje-tekst: #F5DC8C;
+    --naslovni: "Space Grotesk", system-ui, sans-serif;
+    --font: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--tekst);
-    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  }
-  .omotac { max-width: 640px; margin: 0 auto; padding: 16px 16px 40px; }
-  header { display: grid; gap: 12px; margin-bottom: 14px; }
+  body { margin: 0; background: var(--bg); color: var(--tekst); font: 16px/1.45 var(--font); }
+  .omotac { max-width: 560px; margin: 0 auto; padding: 18px 16px 40px; }
+  header { display: grid; gap: 14px; margin-bottom: 16px; }
   .naslovni-red { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  h1 { margin: 0; font-size: 1.35rem; letter-spacing: -.01em; }
-  h2 { margin: 0 0 8px; font-size: 1.2rem; }
+  h1 { margin: 0; display: flex; align-items: center; gap: 10px; font: 700 1.3rem/1 var(--naslovni); letter-spacing: -.02em; }
+  h2 { margin: 0 0 6px; font: 700 1.25rem/1.2 var(--naslovni); }
   button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  button:disabled { cursor: default; opacity: .55; }
+  button:disabled { cursor: default; }
   button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--akcenat); outline-offset: 2px; }
 
-  .segment { display: flex; gap: 4px; padding: 4px; background: var(--segment); border-radius: 12px; }
+  /* Režimi */
+  .segment { display: flex; gap: 6px; padding: 4px; background: var(--povrs); border-radius: 14px; }
   .segment button {
-    flex: 1; min-height: 44px; padding: 6px 10px; border: 0; border-radius: 9px;
+    flex: 1; min-height: 44px; padding: 6px 10px; border: 0; border-radius: 10px;
     background: transparent; font-weight: 600; color: var(--slab);
   }
-  .segment button[aria-pressed="true"] { background: var(--kartica); color: var(--tekst); box-shadow: var(--senka); }
-  .segment.malo button { min-height: 36px; padding: 4px 10px; font-size: .9rem; flex: none; }
+  .segment button[aria-pressed="true"] { background: var(--akcenat); color: var(--akcenat-tekst); font-weight: 700; }
 
-  .kartica { background: var(--kartica); border-radius: 16px; padding: 14px; box-shadow: var(--senka); border: 1px solid var(--linija); }
-
-  .plejer-okvir { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; }
+  /* Scena: YouTube plejer ispod, gramofon preko njega */
+  .scena { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 20px; overflow: hidden; }
   #plejer { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
   .zaklon {
-    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; padding: 12px; text-align: center; color: #fff;
-    background: radial-gradient(circle at 50% 40%, var(--zaklon-1), var(--zaklon-2));
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6%;
+    padding: 4% 6%; background: var(--povrs-2); border: 1px solid var(--linija); border-radius: 20px;
     pointer-events: none; /* dodir prolazi do YouTube plejera (bitno za iOS) */
-    transition: opacity .35s ease;
+    --prsten: var(--akcenat);
   }
-  .zaklon.skriven { opacity: 0; }
-  .zaklon-veliko { font-size: clamp(48px, 17vw, 96px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .zaklon-malo { font-size: .95rem; opacity: .8; }
+  .zaklon.netacno { --prsten: var(--netacno); }
+  .ploca-okvir {
+    --p: 0;
+    position: relative; flex: none; height: 86%; aspect-ratio: 1 / 1; border-radius: 50%;
+    background: conic-gradient(var(--prsten) calc(var(--p) * 360deg), var(--linija) 0);
+  }
+  .ploca {
+    position: absolute; inset: 4%; border-radius: 50%; display: grid; place-items: center;
+    background: repeating-radial-gradient(circle, #121218 0 3px, #1C1C24 3px 5px);
+    animation: vrti 3.2s linear infinite paused;
+  }
+  .etiketa {
+    width: 36%; aspect-ratio: 1 / 1; border-radius: 50%; background: var(--prsten);
+    display: grid; place-items: center; position: relative; overflow: hidden;
+  }
+  .etiketa::after { content: ""; position: absolute; width: 12%; aspect-ratio: 1 / 1; border-radius: 50%; background: var(--bg); }
+  .etiketa span {
+    position: absolute; top: 16%; left: 0; right: 0; text-align: center; color: var(--akcenat-tekst);
+    font: 700 clamp(7px, 2vw, 10px)/1 var(--naslovni); letter-spacing: .06em; text-transform: uppercase;
+  }
+  .zaklon-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .zaklon-malo { font-size: 12px; color: var(--slab); text-transform: uppercase; letter-spacing: .12em; }
+  .zaklon-veliko { font: 700 clamp(40px, 13vw, 68px)/1 var(--naslovni); font-variant-numeric: tabular-nums; color: var(--tekst); }
+  .zaklon.netacno .zaklon-veliko { color: var(--netacno); }
+  .zaklon.tacno .zaklon-veliko { color: var(--tacno); }
+  .ekvilajzer { display: flex; align-items: flex-end; gap: 4px; height: 26px; margin-top: 6px; }
+  .ekvilajzer span {
+    width: 6px; height: 100%; border-radius: 3px; background: var(--prsten); opacity: .35;
+    transform: scaleY(.18); transform-origin: bottom;
+  }
+  .zaklon.svira .ploca { animation-play-state: running; }
+  .zaklon.svira .ekvilajzer span { opacity: 1; animation: skok .9s ease-in-out infinite; }
+  .zaklon.svira.tiho .ekvilajzer span { animation-name: skok-tiho; opacity: .6; }
+  .ekvilajzer span:nth-child(1) { animation-delay: -.15s; }
+  .ekvilajzer span:nth-child(2) { animation-delay: -.55s; animation-duration: .75s; }
+  .ekvilajzer span:nth-child(3) { animation-delay: -.35s; animation-duration: 1.05s; }
+  .ekvilajzer span:nth-child(4) { animation-delay: -.7s; }
+  .ekvilajzer span:nth-child(5) { animation-delay: -.25s; animation-duration: .8s; }
+  .ekvilajzer span:nth-child(6) { animation-delay: -.6s; animation-duration: 1.1s; }
+  .ekvilajzer span:nth-child(7) { animation-delay: -.45s; animation-duration: .85s; }
+  @keyframes vrti { to { transform: rotate(360deg); } }
+  @keyframes skok { 0%, 100% { transform: scaleY(.2); } 50% { transform: scaleY(1); } }
+  @keyframes skok-tiho { 0%, 100% { transform: scaleY(.15); } 50% { transform: scaleY(.45); } }
+  @media (prefers-reduced-motion: reduce) {
+    .zaklon.svira .ploca { animation: none; }
+    .zaklon.svira .ekvilajzer span { animation: none; transform: scaleY(.6); }
+  }
 
-  .tajmer { display: flex; align-items: center; gap: 10px; margin: 10px 2px 0; }
-  .tajmer-traka { flex: 1; height: 6px; border-radius: 3px; background: var(--segment); overflow: hidden; }
-  .tajmer-traka > div { height: 100%; width: 0; background: var(--akcenat); transition: width .1s linear; }
-  .tajmer-oznaka { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; color: var(--slab); font-size: .9rem; }
-
-  .savet { margin: 8px 2px 0; font-size: .9rem; color: var(--slab); min-height: 0; }
+  .savet { margin: 10px 2px 0; font-size: .9rem; color: var(--slab); }
   .savet:empty { display: none; }
 
-  .panel { margin-top: 14px; display: grid; gap: 12px; }
+  .panel { margin-top: 16px; display: grid; gap: 14px; }
   .panel[hidden] { display: none; }
   .opis { margin: 0; color: var(--slab); }
   .info { margin: 0; font-size: .85rem; color: var(--slab); }
 
-  .traka-igre { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-variant-numeric: tabular-nums; }
-  .traka-igre .napredak { font-weight: 600; }
-  .traka-igre .skor { color: var(--slab); margin-left: auto; }
+  /* Traka iznad odgovora: napredak, niz, rezultat */
+  .traka-igre { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .traka-igre .napredak { font: 700 1.1rem var(--naslovni); margin-right: auto; }
+  .traka-igre .napredak small { color: var(--bled); font-size: .9rem; }
+  .cip {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 12px; border-radius: 999px;
+    background: var(--povrs); border: 1px solid var(--linija); font-size: .9rem; font-weight: 700;
+  }
+  .cip:empty, .cip[hidden] { display: none; }
+  .cip b { color: var(--akcenat); }
+  .cip svg { flex: none; }
 
+  /* Dugmad */
   .dugme {
-    display: block; width: 100%; min-height: 52px; padding: 10px 16px; border-radius: 12px;
-    border: 1px solid var(--linija); background: var(--kartica); font-weight: 600; font-size: 1.02rem;
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 54px;
+    padding: 10px 16px; border-radius: 16px; border: 1px solid var(--linija); background: var(--povrs);
+    font: 700 1.02rem var(--naslovni); color: var(--tekst);
   }
   .dugme.primarno { background: var(--akcenat); border-color: var(--akcenat); color: var(--akcenat-tekst); }
-  .dugme.malo { width: auto; min-height: 36px; padding: 4px 12px; font-size: .9rem; font-weight: 500; }
+  .dugme.primarno:disabled { background: var(--povrs); border-color: var(--linija); color: var(--bled); }
+  .dugme.strelica::after { content: "→"; font-size: 1.15em; line-height: 1; }
+  .dugme.malo { width: auto; min-height: 36px; padding: 4px 12px; border-radius: 999px; font: 600 .9rem var(--font); }
   .dugmad { display: grid; gap: 10px; }
   .dugmad:empty { display: none; }
 
-  .odgovor { text-align: center; }
+  /* Odgovor */
+  .odgovor { display: grid; gap: 4px; }
   .odgovor:empty { display: none; }
-  .odgovor .presuda { font-weight: 700; margin-bottom: 2px; }
+  .odgovor .presuda { font-weight: 700; font-size: .95rem; color: var(--slab); }
   .odgovor .presuda.tacno { color: var(--tacno); }
   .odgovor .presuda.netacno { color: var(--netacno); }
-  .odgovor .kompozitor { font-size: 1.35rem; font-weight: 700; }
-  .odgovor .delo { font-size: 1.05rem; }
+  .odgovor .naziv { font: 700 1.6rem/1.15 var(--naslovni); letter-spacing: -.01em; }
+  .odgovor .naziv span { color: var(--slab); font-weight: 500; }
+  .odgovor .dodatak { font-size: .9rem; color: var(--slab); }
 
-  .ponude { display: grid; gap: 10px; }
+  /* Ponude 2×2 */
+  .ponude { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .ponude:empty { display: none; }
-  @media (min-width: 540px) { .ponude { grid-template-columns: 1fr 1fr; } }
   .ponuda {
-    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 12px;
-    text-align: left; border: 2px solid var(--linija); border-radius: 12px; background: var(--kartica);
+    display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-height: 112px; padding: 12px;
+    text-align: left; border: 2px solid var(--linija); border-radius: 16px; background: var(--povrs-2); color: var(--tekst);
   }
   .ponuda .broj {
-    flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
-    background: var(--segment); font-size: .85rem; font-weight: 700; color: var(--slab);
+    flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--boja); color: var(--akcenat-tekst); font: 700 .9rem var(--naslovni);
   }
-  .ponuda .tekst { display: grid; }
-  .ponuda .tekst b { font-weight: 700; }
-  .ponuda.tacno { border-color: var(--tacno); background: var(--tacno-bg); }
-  .ponuda.netacno { border-color: var(--netacno); background: var(--netacno-bg); }
-  .ponuda:disabled { opacity: 1; }
-  .ponuda:disabled:not(.tacno):not(.netacno) { opacity: .5; }
+  .ponuda .tekst { display: grid; gap: 2px; }
+  .ponuda .tekst b { font: 700 1.05rem/1.2 var(--naslovni); }
+  .ponuda .tekst span { font-size: .9rem; color: #C9C9D6; line-height: 1.3; }
+  .ponuda:nth-child(1) { --boja: #C8FF4D; }
+  .ponuda:nth-child(2) { --boja: #FF6B9D; }
+  .ponuda:nth-child(3) { --boja: #5CC8FF; }
+  .ponuda:nth-child(4) { --boja: #FFB547; }
+  .ponuda:not(:disabled):hover { border-color: var(--boja); }
+  .ponuda.tacno { border-color: var(--tacno); background: var(--tacno-bg); --boja: var(--tacno); }
+  .ponuda.netacno { border-color: var(--netacno); background: var(--netacno-bg); --boja: var(--netacno); }
+  .ponuda:disabled:not(.tacno):not(.netacno) { opacity: .4; }
 
   .opcija { display: flex; align-items: center; gap: 10px; min-height: 44px; }
   .opcija input { width: 22px; height: 22px; accent-color: var(--akcenat); }
   .opcija[hidden] { display: none; }
 
-  details { border-top: 1px solid var(--linija); padding-top: 10px; }
-  summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+  details { border-top: 1px solid var(--linija); padding-top: 12px; }
+  summary { cursor: pointer; font-weight: 700; min-height: 32px; }
   .lista-gresaka { margin: 8px 0 12px; padding-left: 1.4em; }
   .lista-gresaka li { margin: 4px 0; }
   .lista-gresaka .brojke { color: var(--slab); font-size: .9rem; white-space: nowrap; }
 
-  .rezultat { font-size: 2.6rem; font-weight: 800; margin: 0; font-variant-numeric: tabular-nums; }
+  /* Kraj runde */
+  .rezultat { margin: 0; font: 700 3.4rem/1 var(--naslovni); font-variant-numeric: tabular-nums; }
+  .rezultat span { color: var(--bled); }
+  .statistike { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 6px 0; }
+  .statistika { background: var(--povrs); border: 1px solid var(--linija); border-radius: 14px; padding: 10px 12px; }
+  .statistika div { font: 700 1.3rem var(--naslovni); color: var(--akcenat); }
+  .statistika small { color: var(--slab); font-size: .82rem; }
   .kraj-lista { margin: 0; padding-left: 1.3em; }
   .kraj-lista li { margin: 3px 0; }
 
-  .upozorenje { background: var(--upozorenje-bg); color: var(--upozorenje-tekst); border-radius: 10px; padding: 10px 12px; font-size: .92rem; }
+  .upozorenje { background: var(--upozorenje-bg); color: var(--upozorenje-tekst); border-radius: 12px; padding: 10px 12px; font-size: .92rem; }
   .upozorenje[hidden] { display: none; }
 
   .obavestenje {
     position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 10;
-    width: calc(100% - 32px); max-width: 560px; padding: 12px 14px; border-radius: 12px;
-    background: #23232a; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.25); font-size: .95rem;
+    width: calc(100% - 32px); max-width: 528px; padding: 12px 14px; border-radius: 14px;
+    background: #F2F2F5; color: #0F0F14; box-shadow: 0 6px 24px rgba(0,0,0,.4); font-size: .95rem; font-weight: 500;
   }
   .obavestenje[hidden] { display: none; }
 
-  footer { margin-top: 18px; text-align: center; font-size: .8rem; color: var(--slab); }
+  footer { margin-top: 22px; text-align: center; font-size: .8rem; color: var(--bled); }
 </style>
 </head>
 <body>
 <div class="omotac">
   <header>
     <div class="naslovni-red">
-      <h1>Muzički kviz</h1>
+      <h1>
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#C8FF4D" stroke-width="2" aria-hidden="true"><circle cx="14" cy="14" r="12"></circle><circle cx="14" cy="14" r="8" stroke-opacity=".4"></circle><circle cx="14" cy="14" r="4"></circle></svg>
+        muzički kviz
+      </h1>
     </div>
     <div class="segment" role="group" aria-label="Režim">
       <button type="button" data-rezim="ucenje">Učenje</button>
@@ -178,17 +220,19 @@
     </div>
   </header>
 
-  <main class="kartica">
-    <div class="plejer-okvir">
+  <main>
+    <div class="scena">
       <div id="plejer"></div>
       <div class="zaklon" id="zaklon" aria-hidden="true">
-        <div class="zaklon-veliko" id="zaklonVeliko">♪</div>
-        <div class="zaklon-malo" id="zaklonMalo"></div>
+        <div class="ploca-okvir" id="ploca">
+          <div class="ploca"><div class="etiketa"><span id="etiketa"></span></div></div>
+        </div>
+        <div class="zaklon-info">
+          <div class="zaklon-malo" id="zaklonMalo"></div>
+          <div class="zaklon-veliko" id="zaklonVeliko">♪</div>
+          <div class="ekvilajzer"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
       </div>
-    </div>
-    <div class="tajmer" id="tajmer" hidden>
-      <div class="tajmer-traka"><div id="tajmerTraka"></div></div>
-      <div class="tajmer-oznaka" id="tajmerOznaka"></div>
     </div>
     <p class="savet" id="savet"></p>
 
@@ -214,7 +258,8 @@
     <section class="panel" id="panelIgra" hidden>
       <div class="traka-igre">
         <span class="napredak" id="napredak"></span>
-        <span class="skor" id="skor"></span>
+        <span class="cip" id="cipNiz" hidden></span>
+        <span class="cip" id="skor" hidden></span>
         <button type="button" class="dugme malo" id="btnPrekini">Prekini</button>
       </div>
       <div class="odgovor" id="odgovor" aria-live="polite"></div>
@@ -330,7 +375,7 @@ function indeksiCestihGresaka() {
 /* ---------- Stanje ---------- */
 let rezim = ['ucenje', 'vezba', 'test'].includes(sacuvano.rezim) ? sacuvano.rezim : 'ucenje';
 let faza = 'start';   // start | slusanje | glas | ceka | otkriveno | kraj
-let runda = null;     // { red, poz, tacno, odgovoreno, pogresne, preskocene }
+let runda = null;     // { red, poz, tacno, odgovoreno, pogresne, preskocene, niz, najduziNiz, najbrze }
 let gen = 0;          // raste pri svakoj promeni kompozicije; poništava zakasnele tajmere
 let ui = { odgovor: false, ponude: [], izabrano: null, najavljeno: false, govori: false };
 
@@ -462,6 +507,7 @@ setTimeout(() => { if (!plejerSpreman && !apiGreska) { apiGreska = true; renderS
 
 function naPromenuStanja(s) {
   ytStanje = s;
+  renderAnimacija();
   if (faza !== 'slusanje') return;
   if (s === 1 && t0 === null) {
     const vd = player.getVideoData ? player.getVideoData() : null;
@@ -505,10 +551,10 @@ function utisaj(cilj, g, gotovo) {
 setInterval(() => {
   if (faza !== 'slusanje' || !player) return;
   if (t0 === null) {
-    if (Date.now() - ucitanoU > 5000) postaviSavet('Ako muzika ne krene, dodirni video.');
+    if (Date.now() - ucitanoU > 5000) postaviSavet('Ako muzika ne krene, dodirni ploču.');
     return;
   }
-  if (ytStanje === 2) postaviSavet('Pauzirano – dodirni video da nastaviš.');
+  if (ytStanje === 2) postaviSavet('Pauzirano – dodirni ploču da nastaviš.');
   if (ytStanje !== 1) return;
   postaviSavet('');
   proteklo = Math.max(0, player.getCurrentTime() - t0);
@@ -524,7 +570,8 @@ function pocniRundu(indeksi) {
     return;
   }
   otkljucajGlas();
-  runda = { red: promesaj(indeksi), poz: -1, tacno: 0, odgovoreno: 0, pogresne: [], preskocene: [] };
+  runda = { red: promesaj(indeksi), poz: -1, tacno: 0, odgovoreno: 0, pogresne: [], preskocene: [],
+    niz: 0, najduziNiz: 0, najbrze: null };
   sledeca(); // poziva se odmah u kliku – YouTube na telefonu traži dodir korisnika
 }
 
@@ -536,7 +583,7 @@ function sledeca() {
   if (runda.poz >= runda.red.length) { zavrsiRundu(); return; }
   const k = trenutna();
   faza = 'slusanje';
-  ui = { odgovor: false, ponude: [], izabrano: null, najavljeno: false, govori: false };
+  ui = { odgovor: false, ponude: [], izabrano: null, najavljeno: false, govori: false, vreme: null };
   t0 = null;
   proteklo = 0;
   ytStanje = -1;
@@ -554,6 +601,8 @@ function sledeca() {
 
 function krajSlusanja() {
   if (faza !== 'slusanje') return;
+  // Ako je "Znam!" kliknuto pre isteka, pamti se za koliko je kompozicija prepoznata.
+  if (t0 !== null && proteklo < limit() - 0.05) ui.vreme = proteklo;
   proteklo = limit();
   postaviSavet('');
   const g = gen;
@@ -632,7 +681,15 @@ function odgovori(idx) {
   const tacno = idx === trenutnaIdx();
   ui.izabrano = idx;
   runda.odgovoreno++;
-  if (tacno) runda.tacno++; else runda.pogresne.push(trenutnaIdx());
+  if (tacno) {
+    runda.tacno++;
+    runda.niz++;
+    runda.najduziNiz = Math.max(runda.najduziNiz, runda.niz);
+    if (ui.vreme !== null && (!runda.najbrze || ui.vreme < runda.najbrze.vreme)) runda.najbrze = { idx: trenutnaIdx(), vreme: ui.vreme };
+  } else {
+    runda.niz = 0;
+    runda.pogresne.push(trenutnaIdx());
+  }
   zabeleziOdgovor(trenutna(), tacno);
   otkrij();
 }
@@ -672,7 +729,7 @@ function obavesti(tekst, ms) {
 function napraviDugme(tekst, klasa, akcija) {
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = 'dugme ' + (klasa || '');
+  b.className = 'dugme ' + (klasa || '') + (tekst === 'Sledeća' ? ' strelica' : '');
   b.textContent = tekst;
   b.addEventListener('click', akcija);
   return b;
@@ -744,39 +801,80 @@ function renderStart() {
   $('btnObrisi').textContent = (potvrdaBrisanja ? 'Klikni ponovo za potvrdu' : 'Obriši napredak');
 }
 
+const brojSek = x => x.toFixed(1).replace('.', ',') + ' s';
+// 2, 3, 4, 22… "tačna", ostalo "tačnih"
+const tacnihZaredom = n => n + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? ' tačna' : ' tačnih') + ' zaredom';
+const tacnoOdgovoreno = () => rezim === 'test' && ui.izabrano !== null && runda && ui.izabrano === trenutnaIdx();
+
+// Gramofon se vrti i ekvilajzer skače samo dok muzika stvarno svira (tiše dok glas govori).
+function renderAnimacija() {
+  const z = $('zaklon');
+  z.classList.toggle('svira', uIgri() && ytStanje === 1);
+  z.classList.toggle('tiho', faza === 'glas' || ui.govori);
+}
+
 function renderZaklon() {
   const z = $('zaklon');
-  const vidljiv = faza === 'start' || faza === 'kraj' || (rezim !== 'ucenje' && !ui.odgovor);
-  z.classList.toggle('skriven', !vidljiv);
+  const presudjeno = rezim === 'test' && faza === 'otkriveno' && ui.izabrano !== null;
+  z.classList.toggle('tacno', presudjeno && tacnoOdgovoreno());
+  z.classList.toggle('netacno', presudjeno && !tacnoOdgovoreno());
   let veliko = '♪', malo = 'Prepoznaj kompoziciju';
-  if (faza === 'slusanje') {
+  if (faza === 'slusanje' && !ui.odgovor) {
     veliko = t0 === null ? '…' : String(Math.max(0, Math.ceil(limit() - proteklo)));
-    malo = t0 === null ? 'Učitavam…' : 'Slušaj pažljivo';
+    malo = t0 === null ? 'Učitavam…' : 'Slušaj';
   } else if (faza === 'ceka') {
     veliko = '?';
     malo = rezim === 'test' ? 'Izaberi odgovor' : 'Znaš li šta je ovo?';
+  } else if (presudjeno) {
+    veliko = tacnoOdgovoreno() ? '✓' : '✗';
+    malo = tacnoOdgovoreno() ? 'Tačno' : 'Netačno';
+  } else if (uIgri() && ui.odgovor) {
+    malo = 'Kompozicija ' + (runda.poz + 1) + '/' + runda.red.length;
+  } else if (faza === 'kraj') {
+    malo = 'Kraj runde';
   }
   if ($('zaklonVeliko').textContent !== veliko) $('zaklonVeliko').textContent = veliko;
   if ($('zaklonMalo').textContent !== malo) $('zaklonMalo').textContent = malo;
+  // Na etiketi ploče piše kompozitor kad je odgovor otkriven, kao na pravoj ploči.
+  const etiketa = uIgri() && ui.odgovor ? kompozitor(trenutna()) : '';
+  if ($('etiketa').textContent !== etiketa) $('etiketa').textContent = etiketa;
+  renderAnimacija();
 }
 
+// Prsten oko ploče je tajmer: puni se dok traje slušanje.
 function renderTajmer() {
-  const vidljiv = uIgri();
-  $('tajmer').hidden = !vidljiv;
-  if (!vidljiv) return;
-  const lim = limit();
-  const p = faza === 'slusanje' ? Math.min(1, proteklo / lim) : 1;
-  $('tajmerTraka').style.width = (p * 100).toFixed(1) + '%';
-  $('tajmerOznaka').textContent = faza === 'slusanje'
-    ? (t0 === null ? '…' : Math.max(0, Math.ceil(lim - proteklo)) + ' s')
-    : '';
+  let p = 0;
+  if (faza === 'slusanje') p = Math.min(1, proteklo / limit());
+  else if (uIgri()) p = 1;
+  $('ploca').style.setProperty('--p', p.toFixed(3));
   renderZaklon();
 }
 
+const IKONA_NIZ = '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#C8FF4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1.5c.5 2.5 3.5 4 3.5 7.5a3.5 3.5 0 0 1-7 0c0-1.6.8-2.6 1.6-3.3C6.3 7.3 7 8 7.6 8 7.3 5.5 8 3.5 8 1.5z"></path></svg>';
+
 function renderTraka() {
   if (!runda) return;
-  $('napredak').textContent = Math.min(runda.poz + 1, runda.red.length) + ' / ' + runda.red.length;
-  $('skor').textContent = rezim === 'test' ? 'Tačno: ' + runda.tacno : '';
+  const nap = $('napredak');
+  nap.textContent = String(Math.min(runda.poz + 1, runda.red.length));
+  const ukupno = document.createElement('small');
+  ukupno.textContent = ' / ' + runda.red.length;
+  nap.appendChild(ukupno);
+
+  const skor = $('skor');
+  skor.hidden = rezim !== 'test';
+  skor.textContent = '';
+  if (rezim === 'test') {
+    const b = document.createElement('b');
+    b.textContent = String(runda.tacno);
+    skor.append(b, ' / ' + runda.odgovoreno + ' tačno');
+  }
+
+  const niz = $('cipNiz');
+  niz.hidden = !(rezim === 'test' && runda.niz >= 2);
+  if (!niz.hidden) {
+    niz.innerHTML = IKONA_NIZ; // statična ikonica iz koda, bez korisničkog teksta
+    niz.append('niz ' + runda.niz);
+  }
 }
 
 function renderOdgovor() {
@@ -785,19 +883,28 @@ function renderOdgovor() {
   if (!ui.odgovor || !runda || !uIgri()) return;
   const k = trenutna();
   if (rezim === 'test' && ui.izabrano !== null) {
-    const tacno = ui.izabrano === trenutnaIdx();
     const p = document.createElement('div');
-    p.className = 'presuda ' + (tacno ? 'tacno' : 'netacno');
-    p.textContent = (tacno ? 'Tačno!' : 'Netačno. Tačan odgovor je:');
+    p.className = 'presuda ' + (tacnoOdgovoreno() ? 'tacno' : 'netacno');
+    p.textContent = tacnoOdgovoreno() ? 'Tačno!' : 'Netačno. Bilo je:';
     el.appendChild(p);
   }
-  const a = document.createElement('div');
-  a.className = 'kompozitor';
-  a.textContent = kompozitor(k);
-  const b = document.createElement('div');
-  b.className = 'delo';
-  b.textContent = delo(k);
-  el.append(a, b);
+  const n = document.createElement('div');
+  n.className = 'naziv';
+  const crta = document.createElement('span');
+  crta.textContent = ' – ';
+  n.append(kompozitor(k), crta, delo(k));
+  el.appendChild(n);
+  if (tacnoOdgovoreno()) {
+    const delovi = [];
+    if (ui.vreme !== null) delovi.push('Prepoznato za ' + brojSek(ui.vreme));
+    if (runda.niz >= 2) delovi.push(tacnihZaredom(runda.niz));
+    if (delovi.length) {
+      const d = document.createElement('div');
+      d.className = 'dodatak';
+      d.textContent = delovi.join(' · ');
+      el.appendChild(d);
+    }
+  }
 }
 
 function renderPonude() {
@@ -817,7 +924,8 @@ function renderPonude() {
     }
     const broj = document.createElement('span');
     broj.className = 'broj';
-    broj.textContent = String(n + 1);
+    broj.textContent = faza === 'otkriveno' && idx === tacan ? '✓'
+      : faza === 'otkriveno' && idx === ui.izabrano ? '✗' : String(n + 1);
     const tekst = document.createElement('span');
     tekst.className = 'tekst';
     const kb = document.createElement('b');
@@ -877,8 +985,27 @@ function renderKraj() {
 
   if (rezim === 'test') {
     dodaj('h2', 'Rezultat');
-    dodaj('p', runda.tacno + '/' + runda.odgovoreno, 'rezultat');
+    const rez = dodaj('p', String(runda.tacno), 'rezultat');
+    const od = document.createElement('span');
+    od.textContent = '/' + runda.odgovoreno;
+    rez.appendChild(od);
     if (runda.odgovoreno && !runda.pogresne.length) dodaj('p', 'Sve tačno! Bravo!', 'opis');
+    const stat = document.createElement('div');
+    stat.className = 'statistike';
+    const kocka = (vrednost, opis) => {
+      const s = document.createElement('div');
+      s.className = 'statistika';
+      const v = document.createElement('div');
+      v.textContent = vrednost;
+      const o = document.createElement('small');
+      o.textContent = opis;
+      s.append(v, o);
+      stat.appendChild(s);
+    };
+    kocka(String(runda.najduziNiz), 'najduži niz tačnih');
+    if (runda.najbrze) kocka(brojSek(runda.najbrze.vreme), 'najbrže: ' + naziv(LISTA[runda.najbrze.idx]));
+    else kocka('–', 'najbrže prepoznato (klikni „Znam!“ ranije)');
+    el.appendChild(stat);
     if (runda.pogresne.length) {
       dodaj('p', 'Pogrešni odgovori:', 'opis');
       lista(runda.pogresne);
@@ -910,7 +1037,6 @@ function renderSve() {
   if (faza === 'start') renderStart();
   if (faza === 'kraj') renderKraj();
   renderTraka();
-  renderZaklon();
   renderTajmer();
   renderOdgovor();
   renderPonude();
