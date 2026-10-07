@@ -40,6 +40,14 @@
   button:disabled { cursor: default; }
   button:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--akcenat); outline-offset: 2px; }
 
+  /* Jezik interfejsa */
+  .jezik { display: flex; gap: 2px; padding: 3px; background: var(--povrs); border-radius: 999px; }
+  .jezik button {
+    min-height: 36px; min-width: 42px; padding: 0 10px; border: 0; border-radius: 999px;
+    background: transparent; color: var(--slab); font: 700 .8rem var(--naslovni); letter-spacing: .06em;
+  }
+  .jezik button[aria-pressed="true"] { background: var(--tekst); color: var(--bg); }
+
   /* Režimi */
   .segment { display: flex; gap: 6px; padding: 4px; background: var(--povrs); border-radius: 14px; }
   .segment button {
@@ -204,13 +212,17 @@
     <div class="naslovni-red">
       <h1>
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#C8FF4D" stroke-width="2" aria-hidden="true"><circle cx="14" cy="14" r="12"></circle><circle cx="14" cy="14" r="8" stroke-opacity=".4"></circle><circle cx="14" cy="14" r="4"></circle></svg>
-        muzički kviz
+        <span data-t="muzički kviz">muzički kviz</span>
       </h1>
+      <div class="jezik" role="group" aria-label="Jezik / Lingua">
+        <button type="button" data-jezik="sr" lang="sr-Latn" aria-pressed="true">SR</button>
+        <button type="button" data-jezik="it" lang="it" aria-pressed="false">IT</button>
+      </div>
     </div>
-    <div class="segment" role="group" aria-label="Režim">
-      <button type="button" data-rezim="ucenje">Učenje</button>
-      <button type="button" data-rezim="vezba">Vežba</button>
-      <button type="button" data-rezim="test">Test</button>
+    <div class="segment" role="group" aria-label="Režim" id="segmentRezim">
+      <button type="button" data-rezim="ucenje" data-t="Učenje">Učenje</button>
+      <button type="button" data-rezim="vezba" data-t="Vežba">Vežba</button>
+      <button type="button" data-rezim="test" data-t="Test">Test</button>
     </div>
   </header>
 
@@ -220,7 +232,7 @@
       <div class="zaklon" id="zaklon" aria-hidden="true">
         <div class="ploca-okvir" id="ploca">
           <div class="ploca">
-            <svg class="natpis" viewBox="0 0 200 200" aria-hidden="true">
+            <svg class="natpis" viewBox="0 0 200 200" aria-hidden="true" lang="sr-Latn">
               <defs>
                 <path id="lukGore" d="M 36,100 A 64,64 0 0 1 164,100"></path>
                 <path id="lukDole" d="M 26,100 A 74,74 0 0 0 174,100"></path>
@@ -246,13 +258,13 @@
       <p class="opis" id="opisRezima"></p>
       <label class="opcija" id="opcijaCeste" hidden>
         <input type="checkbox" id="samoCeste">
-        <span>Samo kompozicije koje često grešim</span>
+        <span data-t="Samo kompozicije koje često grešim">Samo kompozicije koje često grešim</span>
       </label>
       <button type="button" class="dugme primarno" id="btnPocni" disabled></button>
       <p class="info" id="infoLista"></p>
       <p class="info" id="infoGlas"></p>
       <details id="detaljiGresaka" hidden>
-        <summary>Najčešće greške</summary>
+        <summary data-t="Najčešće greške">Najčešće greške</summary>
         <ol class="lista-gresaka" id="listaGresaka"></ol>
         <button type="button" class="dugme malo" id="btnObrisi"></button>
       </details>
@@ -264,10 +276,10 @@
         <span class="napredak" id="napredak"></span>
         <span class="cip" id="cipNiz" hidden></span>
         <span class="cip" id="skor" hidden></span>
-        <button type="button" class="dugme malo" id="btnPrekini">Prekini</button>
+        <button type="button" class="dugme malo" id="btnPrekini" data-t="Prekini">Prekini</button>
       </div>
-      <div class="odgovor" id="odgovor" aria-live="polite"></div>
-      <div class="ponude" id="ponude"></div>
+      <div class="odgovor" id="odgovor" aria-live="polite" lang="sr-Latn"></div>
+      <div class="ponude" id="ponude" lang="sr-Latn"></div>
       <div class="dugmad" id="dugmad"></div>
     </section>
 
@@ -278,7 +290,7 @@
     </section>
   </main>
 
-  <footer>Muzika se pušta sa YouTube-a. Potrebna je internet veza.</footer>
+  <footer data-t="Muzika se pušta sa YouTube-a. Potrebna je internet veza.">Muzika se pušta sa YouTube-a. Potrebna je internet veza.</footer>
 </div>
 <div class="obavestenje" id="obavestenje" role="status" hidden></div>
 
@@ -376,6 +388,87 @@ function indeksiCestihGresaka() {
     return s && s.pogresno > 0 && s.pogresno >= s.tacno;
   });
 }
+
+/* ---------- Jezik interfejsa (srpski / italijanski) ----------
+   Tekstovi su u kodu napisani na srpskom; t() ih menja italijanskim kad je izabran IT.
+   {0}, {1} su mesta za brojeve. Nazivi kompozicija i glas ostaju na srpskom. */
+const IT = {
+  'muzički kviz': 'quiz musicale',
+  'Muzički kviz': 'Quiz musicale',
+  'Režim': 'Modalità',
+  'Učenje': 'Impara',
+  'Vežba': 'Esercizio',
+  'Test': 'Test',
+  'Samo kompozicije koje često grešim': 'Solo i brani che sbaglio spesso',
+  'Najčešće greške': 'Errori più frequenti',
+  'Prekini': 'Interrompi',
+  'Muzika se pušta sa YouTube-a. Potrebna je internet veza.': 'La musica viene riprodotta da YouTube. Serve una connessione a Internet.',
+  'Ako muzika ne krene, dodirni ploču.': 'Se la musica non parte, tocca il disco.',
+  'Pauzirano – dodirni ploču da nastaviš.': 'In pausa – tocca il disco per continuare.',
+  'Za test su potrebne bar 4 različite kompozicije u listi.': 'Per il test servono almeno 4 brani diversi nella lista.',
+  'video nije dostupan (greška {0}). Preskačem.': 'video non disponibile (errore {0}). Lo salto.',
+  'Slušaš {0}, a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Muzika zatim svira još malo (ukupno {1} po kompoziciji), pa sama ide sledeća.':
+    'Ascolti per {0}, poi una voce (in serbo) dice il compositore e il titolo – oppure subito, con «Dimmi subito il titolo». La musica continua ancora un po’ ({1} in tutto per brano), poi parte da sola il brano successivo.',
+  'Slušaš {0} i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.':
+    'Ascolti per {0} e provi a ricordare. Quando lo riconosci (anche prima del tempo), premi «Mostra la risposta» e la voce dirà il titolo.',
+  'Slušaš {0} i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.':
+    'Ascolti per {0} e scegli una delle quattro risposte (se lo sai prima, premi «Lo so!»). Alla fine vedi il risultato.',
+  'Fajl je otvoren direktno sa diska. YouTube tada odbija da pusti video (greška 153). Aplikaciju treba otvoriti preko http(s) linka – pogledaj uputstvo.':
+    'Il file è aperto direttamente dal disco: in questo caso YouTube non riproduce il video (errore 153). Apri l’app tramite un link http(s).',
+  'YouTube plejer nije mogao da se učita. Proveri internet vezu i osveži stranicu.': 'Non è stato possibile caricare il lettore YouTube. Controlla la connessione e ricarica la pagina.',
+  'Počni': 'Inizia',
+  'Plejer nije dostupan': 'Lettore non disponibile',
+  'Učitavam plejer…': 'Carico il lettore…',
+  'Broj kompozicija u listi: {0}': 'Brani nella lista: {0}',
+  'Najave: snimljeni srpski glas.': 'Annunci: voce registrata in serbo.',
+  'Snimljene najave: {0} od {1}. Ostale čita glas pregledača.': 'Annunci registrati: {0} su {1}. Gli altri li legge la voce del browser.',
+  'Pregledač ne podržava izgovor – naziv će biti prikazan kao tekst.': 'Il browser non supporta la sintesi vocale – il titolo verrà mostrato come testo.',
+  'Nije pronađen glas za izgovor – naziv će biti prikazan kao tekst.': 'Nessuna voce disponibile – il titolo verrà mostrato come testo.',
+  'Glas: ': 'Voce: ',
+  ' – nije pronađen srpski ni hrvatski glas': ' – nessuna voce serba o croata',
+  'Još nema grešaka.': 'Ancora nessun errore.',
+  'Klikni ponovo za potvrdu': 'Premi di nuovo per confermare',
+  'Obriši napredak': 'Cancella i progressi',
+  'Napredak je obrisan.': 'Progressi cancellati.',
+  'Prepoznaj kompoziciju': 'Riconosci il brano',
+  'Učitavam…': 'Carico…',
+  'Slušaj': 'Ascolta',
+  'Izaberi odgovor': 'Scegli la risposta',
+  'Znaš li šta je ovo?': 'Sai che brano è?',
+  'Tačno': 'Giusto',
+  'Netačno': 'Sbagliato',
+  'Kompozicija {0}/{1}': 'Brano {0}/{1}',
+  'Kraj runde': 'Fine del turno',
+  ' / {0} tačno': ' / {0} giuste',
+  'niz {0}': 'serie {0}',
+  'Tačno!': 'Giusto!',
+  'Netačno. Bilo je:': 'Sbagliato. Era:',
+  'Prepoznato za {0}': 'Riconosciuto in {0}',
+  'Otkrij odgovor': 'Mostra la risposta',
+  'Znam! Prikaži odgovore': 'Lo so! Mostra le risposte',
+  'Vidi rezultat': 'Vedi il risultato',
+  'Završi': 'Fine',
+  'Sledeća': 'Avanti',
+  'Reci naziv odmah': 'Dimmi subito il titolo',
+  'Rezultat': 'Risultato',
+  'Sve tačno! Bravo!': 'Tutto giusto! Bravo!',
+  'najduži niz tačnih': 'serie più lunga di risposte giuste',
+  'najbrže: {0}': 'il più veloce: {0}',
+  'najbrže prepoznato (klikni „Znam!“ ranije)': 'riconoscimento più veloce (premi «Lo so!» prima)',
+  'Pogrešni odgovori:': 'Risposte sbagliate:',
+  'Savet: prebaci na Učenje pa klikni „Ponovi samo pogrešne“ da ih preslušaš sa nazivima.':
+    'Consiglio: passa a «Impara» e premi «Ripeti solo gli errori» per riascoltarli con i titoli.',
+  'Preslušano kompozicija: {0}': 'Brani ascoltati: {0}',
+  'Ovi video snimci nisu dostupni (proveri youtubeId u listi):': 'Questi video non sono disponibili (controlla youtubeId nella lista):',
+  'Ponovi samo pogrešne': 'Ripeti solo gli errori',
+  'Nova runda': 'Nuovo turno',
+  'Nazad na početak': 'Torna all’inizio',
+};
+let jezik = sacuvano.jezik === 'it' ? 'it' : 'sr';
+const t = (tekst, ...vrednosti) => {
+  const prevod = jezik === 'it' && IT[tekst] !== undefined ? IT[tekst] : tekst;
+  return prevod.replace(/\{(\d)\}/g, (_, i) => vrednosti[i]);
+};
 
 /* ---------- Stanje ---------- */
 let rezim = ['ucenje', 'vezba', 'test'].includes(sacuvano.rezim) ? sacuvano.rezim : 'ucenje';
@@ -534,7 +627,7 @@ function naGresku(kod) {
   }
   if (!k) return;
   runda.preskocene.push(trenutnaIdx());
-  obavesti(naziv(k) + ': ' + ('video nije dostupan (greška ' + kod + '). Preskačem.'));
+  obavesti(naziv(k) + ': ' + t('video nije dostupan (greška {0}). Preskačem.', kod));
   const g = gen;
   setTimeout(() => { if (g === gen) sledeca(); }, 1500);
 }
@@ -556,10 +649,10 @@ function utisaj(cilj, g, gotovo) {
 setInterval(() => {
   if (faza !== 'slusanje' || !player) return;
   if (t0 === null) {
-    if (Date.now() - ucitanoU > 5000) postaviSavet('Ako muzika ne krene, dodirni ploču.');
+    if (Date.now() - ucitanoU > 5000) postaviSavet(t('Ako muzika ne krene, dodirni ploču.'));
     return;
   }
-  if (ytStanje === 2) postaviSavet('Pauzirano – dodirni ploču da nastaviš.');
+  if (ytStanje === 2) postaviSavet(t('Pauzirano – dodirni ploču da nastaviš.'));
   if (ytStanje !== 1) return;
   postaviSavet('');
   proteklo = Math.max(0, player.getCurrentTime() - t0);
@@ -571,7 +664,7 @@ setInterval(() => {
 function pocniRundu(indeksi) {
   if (!plejerSpreman || !indeksi.length) return;
   if (rezim === 'test' && new Set(LISTA.map(kljucStavke)).size < 4) {
-    obavesti('Za test su potrebne bar 4 različite kompozicije u listi.');
+    obavesti(t('Za test su potrebne bar 4 različite kompozicije u listi.'));
     return;
   }
   otkljucajGlas();
@@ -753,28 +846,34 @@ function napraviDugme(tekst, klasa, akcija) {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'dugme ' + (klasa || '') + (tekst === 'Sledeća' ? ' strelica' : '');
+  tekst = t(tekst);
   b.textContent = tekst;
   b.addEventListener('click', akcija);
   return b;
 }
 
 // "1 sekundu", "2–4 sekunde", "5 sekundi" (i 21, 22… po istom pravilu)
-const sekundi = n => n + (n % 10 === 1 && n % 100 !== 11 ? ' sekundu'
+// Italijanski: "1 secondo", ostalo "secondi".
+const sekundi = n => jezik === 'it' ? n + (n === 1 ? ' secondo' : ' secondi')
+  : n + (n % 10 === 1 && n % 100 !== 11 ? ' sekundu'
   : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? ' sekunde' : ' sekundi');
 
 const OPISI = {
-  ucenje: () => 'Slušaš ' + sekundi(PODESAVANJA.UCENJE_SEK) + ', a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Muzika zatim svira još malo (ukupno ' + sekundi(PODESAVANJA.UCENJE_UKUPNO_SEK) + ' po kompoziciji), pa sama ide sledeća.',
-  vezba: () => 'Slušaš ' + sekundi(PODESAVANJA.VEZBA_SEK) + ' i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.',
-  test: () => 'Slušaš ' + sekundi(PODESAVANJA.TEST_SEK) + ' i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
+  ucenje: () => t('Slušaš {0}, a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Muzika zatim svira još malo (ukupno {1} po kompoziciji), pa sama ide sledeća.',
+    sekundi(PODESAVANJA.UCENJE_SEK), sekundi(PODESAVANJA.UCENJE_UKUPNO_SEK)),
+  vezba: () => t('Slušaš {0} i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.',
+    sekundi(PODESAVANJA.VEZBA_SEK)),
+  test: () => t('Slušaš {0} i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
+    sekundi(PODESAVANJA.TEST_SEK)),
 };
 
 function renderStart() {
   const upozorenje = $('upozorenje');
   let poruka = '';
   if (fileGreska || location.protocol === 'file:') {
-    poruka = 'Fajl je otvoren direktno sa diska. YouTube tada odbija da pusti video (greška 153). Aplikaciju treba otvoriti preko http(s) linka – pogledaj uputstvo.';
+    poruka = t('Fajl je otvoren direktno sa diska. YouTube tada odbija da pusti video (greška 153). Aplikaciju treba otvoriti preko http(s) linka – pogledaj uputstvo.');
   } else if (apiGreska && !plejerSpreman) {
-    poruka = 'YouTube plejer nije mogao da se učita. Proveri internet vezu i osveži stranicu.';
+    poruka = t('YouTube plejer nije mogao da se učita. Proveri internet vezu i osveži stranicu.');
   }
   upozorenje.textContent = poruka;
   upozorenje.hidden = !poruka;
@@ -783,24 +882,24 @@ function renderStart() {
 
   const btn = $('btnPocni');
   btn.disabled = !plejerSpreman || !LISTA.length || fileGreska;
-  btn.textContent = (plejerSpreman ? 'Počni' : apiGreska ? 'Plejer nije dostupan' : 'Učitavam plejer…');
+  btn.textContent = t(plejerSpreman ? 'Počni' : apiGreska ? 'Plejer nije dostupan' : 'Učitavam plejer…');
 
   const ceste = indeksiCestihGresaka();
   $('opcijaCeste').hidden = ceste.length === 0;
   if (!ceste.length) $('samoCeste').checked = false;
 
-  $('infoLista').textContent = 'Broj kompozicija u listi: ' + LISTA.length;
+  $('infoLista').textContent = t('Broj kompozicija u listi: {0}', LISTA.length);
 
   let infoGlas;
   const snimljenih = LISTA.filter(k => k.audio).length;
-  if (snimljenih === LISTA.length) infoGlas = 'Najave: snimljeni srpski glas.';
-  else if (snimljenih) infoGlas = ('Snimljene najave: ' + snimljenih + ' od ' + LISTA.length + '. Ostale čita glas pregledača.');
-  else if (!imaSintezu) infoGlas = 'Pregledač ne podržava izgovor – naziv će biti prikazan kao tekst.';
-  else if (!glas) infoGlas = 'Nije pronađen glas za izgovor – naziv će biti prikazan kao tekst.';
+  if (snimljenih === LISTA.length) infoGlas = t('Najave: snimljeni srpski glas.');
+  else if (snimljenih) infoGlas = t('Snimljene najave: {0} od {1}. Ostale čita glas pregledača.', snimljenih, LISTA.length);
+  else if (!imaSintezu) infoGlas = t('Pregledač ne podržava izgovor – naziv će biti prikazan kao tekst.');
+  else if (!glas) infoGlas = t('Nije pronađen glas za izgovor – naziv će biti prikazan kao tekst.');
   else {
     const l = (glas.lang || '').toLowerCase();
     const nas = l.startsWith('sr') || l.startsWith('hr') || l.startsWith('bs');
-    infoGlas = 'Glas: ' + glas.name + ' (' + glas.lang + ')' + (nas ? '' : ' – nije pronađen srpski ni hrvatski glas');
+    infoGlas = t('Glas: ') + glas.name + ' (' + glas.lang + ')' + (nas ? '' : t(' – nije pronađen srpski ni hrvatski glas'));
   }
   $('infoGlas').textContent = infoGlas;
 
@@ -813,7 +912,7 @@ function renderStart() {
   ol.textContent = '';
   if (!sa.length) {
     const li = document.createElement('li');
-    li.textContent = 'Još nema grešaka.';
+    li.textContent = t('Još nema grešaka.');
     ol.appendChild(li);
   }
   for (const { k, s } of sa) {
@@ -825,12 +924,13 @@ function renderStart() {
     li.appendChild(br);
     ol.appendChild(li);
   }
-  $('btnObrisi').textContent = (potvrdaBrisanja ? 'Klikni ponovo za potvrdu' : 'Obriši napredak');
+  $('btnObrisi').textContent = t(potvrdaBrisanja ? 'Klikni ponovo za potvrdu' : 'Obriši napredak');
 }
 
 const brojSek = x => x.toFixed(1).replace('.', ',') + ' s';
 // 2, 3, 4, 22… "tačna", ostalo "tačnih"
-const tacnihZaredom = n => n + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? ' tačna' : ' tačnih') + ' zaredom';
+const tacnihZaredom = n => jezik === 'it' ? n + ' giuste di fila'
+  : n + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? ' tačna' : ' tačnih') + ' zaredom';
 const tacnoOdgovoreno = () => rezim === 'test' && ui.izabrano !== null && runda && ui.izabrano === trenutnaIdx();
 
 // Gramofon se vrti i ekvilajzer skače samo dok muzika stvarno svira (tiše dok glas govori).
@@ -878,20 +978,20 @@ function renderZaklon() {
   const presudjeno = rezim === 'test' && faza === 'otkriveno' && ui.izabrano !== null;
   z.classList.toggle('tacno', presudjeno && tacnoOdgovoreno());
   z.classList.toggle('netacno', presudjeno && !tacnoOdgovoreno());
-  let veliko = '♪', malo = 'Prepoznaj kompoziciju';
+  let veliko = '♪', malo = t('Prepoznaj kompoziciju');
   if (faza === 'slusanje' && !ui.odgovor) {
     veliko = t0 === null ? '…' : String(Math.max(0, Math.ceil(limit() - proteklo)));
-    malo = t0 === null ? 'Učitavam…' : 'Slušaj';
+    malo = t(t0 === null ? 'Učitavam…' : 'Slušaj');
   } else if (faza === 'ceka') {
     veliko = '?';
-    malo = rezim === 'test' ? 'Izaberi odgovor' : 'Znaš li šta je ovo?';
+    malo = t(rezim === 'test' ? 'Izaberi odgovor' : 'Znaš li šta je ovo?');
   } else if (presudjeno) {
     veliko = tacnoOdgovoreno() ? '✓' : '✗';
-    malo = tacnoOdgovoreno() ? 'Tačno' : 'Netačno';
+    malo = t(tacnoOdgovoreno() ? 'Tačno' : 'Netačno');
   } else if (uIgri() && ui.odgovor) {
-    malo = 'Kompozicija ' + (runda.poz + 1) + '/' + runda.red.length;
+    malo = t('Kompozicija {0}/{1}', runda.poz + 1, runda.red.length);
   } else if (faza === 'kraj') {
-    malo = 'Kraj runde';
+    malo = t('Kraj runde');
   }
   if ($('zaklonVeliko').textContent !== veliko) $('zaklonVeliko').textContent = veliko;
   if ($('zaklonMalo').textContent !== malo) $('zaklonMalo').textContent = malo;
@@ -936,14 +1036,14 @@ function renderTraka() {
   if (rezim === 'test') {
     const b = document.createElement('b');
     b.textContent = String(runda.tacno);
-    skor.append(b, ' / ' + runda.odgovoreno + ' tačno');
+    skor.append(b, t(' / {0} tačno', runda.odgovoreno));
   }
 
   const niz = $('cipNiz');
   niz.hidden = !(rezim === 'test' && runda.niz >= 2);
   if (!niz.hidden) {
     niz.innerHTML = IKONA_NIZ; // statična ikonica iz koda, bez korisničkog teksta
-    niz.append('niz ' + runda.niz);
+    niz.append(t('niz {0}', runda.niz));
   }
 }
 
@@ -955,7 +1055,7 @@ function renderOdgovor() {
   if (rezim === 'test' && ui.izabrano !== null) {
     const p = document.createElement('div');
     p.className = 'presuda ' + (tacnoOdgovoreno() ? 'tacno' : 'netacno');
-    p.textContent = tacnoOdgovoreno() ? 'Tačno!' : 'Netačno. Bilo je:';
+    p.textContent = t(tacnoOdgovoreno() ? 'Tačno!' : 'Netačno. Bilo je:');
     el.appendChild(p);
   }
   const n = document.createElement('div');
@@ -966,7 +1066,7 @@ function renderOdgovor() {
   el.appendChild(n);
   if (tacnoOdgovoreno()) {
     const delovi = [];
-    if (ui.vreme !== null) delovi.push('Prepoznato za ' + brojSek(ui.vreme));
+    if (ui.vreme !== null) delovi.push(t('Prepoznato za {0}', brojSek(ui.vreme)));
     if (runda.niz >= 2) delovi.push(tacnihZaredom(runda.niz));
     if (delovi.length) {
       const d = document.createElement('div');
@@ -1045,6 +1145,7 @@ function renderKraj() {
   const lista = (indeksi) => {
     const ul = document.createElement('ul');
     ul.className = 'kraj-lista';
+    ul.lang = 'sr-Latn';
     for (const i of indeksi) {
       const li = document.createElement('li');
       li.textContent = naziv(LISTA[i]);
@@ -1054,12 +1155,12 @@ function renderKraj() {
   };
 
   if (rezim === 'test') {
-    dodaj('h2', 'Rezultat');
+    dodaj('h2', t('Rezultat'));
     const rez = dodaj('p', String(runda.tacno), 'rezultat');
     const od = document.createElement('span');
     od.textContent = '/' + runda.odgovoreno;
     rez.appendChild(od);
-    if (runda.odgovoreno && !runda.pogresne.length) dodaj('p', 'Sve tačno! Bravo!', 'opis');
+    if (runda.odgovoreno && !runda.pogresne.length) dodaj('p', t('Sve tačno! Bravo!'), 'opis');
     const stat = document.createElement('div');
     stat.className = 'statistike';
     const kocka = (vrednost, opis) => {
@@ -1072,21 +1173,21 @@ function renderKraj() {
       s.append(v, o);
       stat.appendChild(s);
     };
-    kocka(String(runda.najduziNiz), 'najduži niz tačnih');
-    if (runda.najbrze) kocka(brojSek(runda.najbrze.vreme), 'najbrže: ' + naziv(LISTA[runda.najbrze.idx]));
-    else kocka('–', 'najbrže prepoznato (klikni „Znam!“ ranije)');
+    kocka(String(runda.najduziNiz), t('najduži niz tačnih'));
+    if (runda.najbrze) kocka(brojSek(runda.najbrze.vreme), t('najbrže: {0}', naziv(LISTA[runda.najbrze.idx])));
+    else kocka('–', t('najbrže prepoznato (klikni „Znam!“ ranije)'));
     el.appendChild(stat);
     if (runda.pogresne.length) {
-      dodaj('p', 'Pogrešni odgovori:', 'opis');
+      dodaj('p', t('Pogrešni odgovori:'), 'opis');
       lista(runda.pogresne);
-      dodaj('p', 'Savet: prebaci na Učenje pa klikni „Ponovi samo pogrešne“ da ih preslušaš sa nazivima.', 'info');
+      dodaj('p', t('Savet: prebaci na Učenje pa klikni „Ponovi samo pogrešne“ da ih preslušaš sa nazivima.'), 'info');
     }
   } else {
-    dodaj('h2', 'Kraj runde');
-    dodaj('p', 'Preslušano kompozicija: ' + (runda.red.length - runda.preskocene.length), 'opis');
+    dodaj('h2', t('Kraj runde'));
+    dodaj('p', t('Preslušano kompozicija: {0}', runda.red.length - runda.preskocene.length), 'opis');
   }
   if (runda.preskocene.length) {
-    dodaj('p', 'Ovi video snimci nisu dostupni (proveri youtubeId u listi):', 'info');
+    dodaj('p', t('Ovi video snimci nisu dostupni (proveri youtubeId u listi):'), 'info');
     lista(runda.preskocene);
   }
 
@@ -1097,6 +1198,11 @@ function renderKraj() {
 }
 
 function renderSve() {
+  document.documentElement.lang = jezik === 'it' ? 'it' : 'sr-Latn';
+  document.title = t('Muzički kviz');
+  document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
+  $('segmentRezim').setAttribute('aria-label', t('Režim'));
+  document.querySelectorAll('[data-jezik]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.jezik === jezik)));
   document.querySelectorAll('[data-rezim]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.rezim === rezim)));
 
   $('panelStart').hidden = faza !== 'start';
@@ -1122,6 +1228,14 @@ document.querySelectorAll('[data-rezim]').forEach(b => b.addEventListener('click
   if (uIgri()) prekini(); else renderSve(); // na ekranu "Kraj" ostaje se, pa nova runda ide u novom režimu
 }));
 
+document.querySelectorAll('[data-jezik]').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.jezik === jezik) return;
+  jezik = b.dataset.jezik;
+  sacuvano.jezik = jezik;
+  sacuvaj();
+  renderSve(); // runda se ne prekida, samo se tekstovi prevode
+}));
+
 $('btnPocni').addEventListener('click', () => {
   const indeksi = $('samoCeste').checked ? indeksiCestihGresaka() : LISTA.map((k, i) => i);
   pocniRundu(indeksi);
@@ -1137,7 +1251,7 @@ $('btnObrisi').addEventListener('click', () => {
     potvrdaBrisanja = false;
     sacuvano.statistika = {};
     sacuvaj();
-    obavesti('Napredak je obrisan.');
+    obavesti(t('Napredak je obrisan.'));
   }
   renderStart();
 });
