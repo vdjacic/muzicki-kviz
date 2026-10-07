@@ -73,10 +73,11 @@
     display: grid; place-items: center; position: relative; overflow: hidden;
   }
   .etiketa::after { content: ""; position: absolute; width: 12%; aspect-ratio: 1 / 1; border-radius: 50%; background: var(--bg); }
-  .etiketa span {
-    position: absolute; top: 16%; left: 0; right: 0; text-align: center; color: var(--akcenat-tekst);
-    font: 700 clamp(7px, 2vw, 10px)/1 var(--naslovni); letter-spacing: .06em; text-transform: uppercase;
-  }
+  /* Natpis u krug po ploči: kompozitor gornjim lukom, delo donjim (veličinu slova podešava JS). */
+  .natpis { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .natpis text { font-family: var(--naslovni); }
+  .natpis-gore { fill: var(--prsten); font-weight: 700; letter-spacing: .12em; }
+  .natpis-dole { fill: #E4E4EC; font-weight: 500; letter-spacing: .03em; }
   .zaklon-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .zaklon-malo { font-size: 12px; color: var(--slab); text-transform: uppercase; letter-spacing: .12em; }
   .zaklon-veliko { font: 700 clamp(40px, 13vw, 68px)/1 var(--naslovni); font-variant-numeric: tabular-nums; color: var(--tekst); }
@@ -218,7 +219,17 @@
       <div id="plejer"></div>
       <div class="zaklon" id="zaklon" aria-hidden="true">
         <div class="ploca-okvir" id="ploca">
-          <div class="ploca"><div class="etiketa"><span id="etiketa"></span></div></div>
+          <div class="ploca">
+            <svg class="natpis" viewBox="0 0 200 200" aria-hidden="true">
+              <defs>
+                <path id="lukGore" d="M 36,100 A 64,64 0 0 1 164,100"></path>
+                <path id="lukDole" d="M 26,100 A 74,74 0 0 0 174,100"></path>
+              </defs>
+              <text class="natpis-gore"><textPath href="#lukGore" startOffset="50%" text-anchor="middle" id="natpisGore"></textPath></text>
+              <text class="natpis-dole"><textPath href="#lukDole" startOffset="50%" text-anchor="middle" id="natpisDole"></textPath></text>
+            </svg>
+            <div class="etiketa"></div>
+          </div>
         </div>
         <div class="zaklon-info">
           <div class="zaklon-malo" id="zaklonMalo"></div>
@@ -640,6 +651,7 @@ function najaviOdmah() {
   utisaj(PODESAVANJA.GLASNOCA_ISPOD_GLASA, g, () => {
     izgovori(k, g, () => {
       ui.govori = false;
+      renderAnimacija();
       if (faza === 'glas') predjiNaSledecuUcenje(g); // vreme je isteklo dok je glas govorio
       else utisaj(100, g);
     });
@@ -665,7 +677,14 @@ function pripremiPonude() {
 function otkrij() {
   faza = 'otkriveno';
   ui.odgovor = true;
-  try { player.setVolume(100); player.playVideo(); } catch (e) { /* ništa */ }
+  // U Vežbi glas izgovori naziv, a muzika svira tiše dok govori pa se vrati na punu jačinu.
+  const govor = rezim === 'vezba';
+  const g = gen;
+  try { player.setVolume(govor ? PODESAVANJA.GLASNOCA_ISPOD_GLASA : 100); player.playVideo(); } catch (e) { /* ništa */ }
+  if (govor) {
+    ui.govori = true;
+    izgovori(trenutna(), g, () => { ui.govori = false; renderAnimacija(); utisaj(100, g); });
+  }
   renderSve();
 }
 
@@ -730,7 +749,7 @@ function napraviDugme(tekst, klasa, akcija) {
 
 const OPISI = {
   ucenje: () => 'Slušaš ' + PODESAVANJA.UCENJE_SEK + ' sekundi, a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Kompozicije idu same, jedna za drugom.',
-  vezba: () => 'Slušaš ' + PODESAVANJA.VEZBA_SEK + ' sekundi i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“.',
+  vezba: () => 'Slušaš ' + PODESAVANJA.VEZBA_SEK + ' sekundi i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“ i glas će reći naziv.',
   test: () => 'Slušaš ' + PODESAVANJA.TEST_SEK + ' sekundi i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
 };
 
@@ -861,10 +880,20 @@ function renderZaklon() {
   }
   if ($('zaklonVeliko').textContent !== veliko) $('zaklonVeliko').textContent = veliko;
   if ($('zaklonMalo').textContent !== malo) $('zaklonMalo').textContent = malo;
-  // Na etiketi ploče piše kompozitor kad je odgovor otkriven, kao na pravoj ploči.
-  const etiketa = uIgri() && ui.odgovor ? kompozitor(trenutna()) : '';
-  if ($('etiketa').textContent !== etiketa) $('etiketa').textContent = etiketa;
+  // Kad je odgovor otkriven, po ploči u krug piše kompozitor (gore) i delo (dole).
+  const k = uIgri() && ui.odgovor ? trenutna() : null;
+  postaviNatpis('natpisGore', k ? kompozitor(k).toLocaleUpperCase('sr') : '', 201, 0.72, 15);
+  postaviNatpis('natpisDole', k ? delo(k) : '', 232, 0.56, 14);
   renderAnimacija();
+}
+
+// Smanjuje slova dok tekst ne stane u polukrug (dužina luka u jedinicama viewBox-a 200×200).
+function postaviNatpis(id, tekst, duzinaLuka, sirinaSlova, najvise) {
+  const el = $(id);
+  if (el.textContent === tekst) return;
+  el.textContent = tekst;
+  const velicina = tekst ? Math.min(najvise, duzinaLuka * 0.86 / (tekst.length * sirinaSlova)) : najvise;
+  el.parentNode.setAttribute('font-size', velicina.toFixed(1));
 }
 
 // Prsten oko ploče je tajmer: puni se dok traje slušanje.
