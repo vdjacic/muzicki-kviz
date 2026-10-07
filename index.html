@@ -82,27 +82,18 @@
   .zaklon-veliko { font: 700 clamp(40px, 13vw, 68px)/1 var(--naslovni); font-variant-numeric: tabular-nums; color: var(--tekst); }
   .zaklon.netacno .zaklon-veliko { color: var(--netacno); }
   .zaklon.tacno .zaklon-veliko { color: var(--tacno); }
-  .ekvilajzer { display: flex; align-items: flex-end; gap: 4px; height: 26px; margin-top: 6px; }
+  /* Visine traka postavlja JS (animirajEkvilajzer): basovi levo, visoki tonovi desno. */
+  .ekvilajzer { display: flex; align-items: flex-end; gap: 3px; height: 32px; margin-top: 6px; }
   .ekvilajzer span {
-    width: 6px; height: 100%; border-radius: 3px; background: var(--prsten); opacity: .35;
-    transform: scaleY(.18); transform-origin: bottom;
+    width: 5px; height: 100%; border-radius: 2px; background: var(--prsten); opacity: .35;
+    transform: scaleY(.06); transform-origin: bottom; will-change: transform;
   }
   .zaklon.svira .ploca { animation-play-state: running; }
-  .zaklon.svira .ekvilajzer span { opacity: 1; animation: skok .9s ease-in-out infinite; }
-  .zaklon.svira.tiho .ekvilajzer span { animation-name: skok-tiho; opacity: .6; }
-  .ekvilajzer span:nth-child(1) { animation-delay: -.15s; }
-  .ekvilajzer span:nth-child(2) { animation-delay: -.55s; animation-duration: .75s; }
-  .ekvilajzer span:nth-child(3) { animation-delay: -.35s; animation-duration: 1.05s; }
-  .ekvilajzer span:nth-child(4) { animation-delay: -.7s; }
-  .ekvilajzer span:nth-child(5) { animation-delay: -.25s; animation-duration: .8s; }
-  .ekvilajzer span:nth-child(6) { animation-delay: -.6s; animation-duration: 1.1s; }
-  .ekvilajzer span:nth-child(7) { animation-delay: -.45s; animation-duration: .85s; }
+  .zaklon.svira .ekvilajzer span { opacity: 1; }
+  .zaklon.svira.tiho .ekvilajzer span { opacity: .65; }
   @keyframes vrti { to { transform: rotate(360deg); } }
-  @keyframes skok { 0%, 100% { transform: scaleY(.2); } 50% { transform: scaleY(1); } }
-  @keyframes skok-tiho { 0%, 100% { transform: scaleY(.15); } 50% { transform: scaleY(.45); } }
   @media (prefers-reduced-motion: reduce) {
     .zaklon.svira .ploca { animation: none; }
-    .zaklon.svira .ekvilajzer span { animation: none; transform: scaleY(.6); }
   }
 
   .savet { margin: 10px 2px 0; font-size: .9rem; color: var(--slab); }
@@ -162,11 +153,13 @@
   .ponuda .tekst { display: grid; gap: 2px; }
   .ponuda .tekst b { font: 700 1.05rem/1.2 var(--naslovni); }
   .ponuda .tekst span { font-size: .9rem; color: #C9C9D6; line-height: 1.3; }
-  .ponuda:nth-child(1) { --boja: #C8FF4D; }
-  .ponuda:nth-child(2) { --boja: #FF6B9D; }
-  .ponuda:nth-child(3) { --boja: #5CC8FF; }
-  .ponuda:nth-child(4) { --boja: #FFB547; }
-  .ponuda:not(:disabled):hover { border-color: var(--boja); }
+  /* Boje brojeva namerno nisu limeta (tačno) ni roze (netačno), da ne liče na presudu. */
+  .ponuda:nth-child(1) { --boja: #5CC8FF; }
+  .ponuda:nth-child(2) { --boja: #FFB547; }
+  .ponuda:nth-child(3) { --boja: #B49CFF; }
+  .ponuda:nth-child(4) { --boja: #4FD8C4; }
+  /* Samo na uređajima sa mišem: na telefonu bi prst sa "Znam!" ostavio okvir na polju ispod. */
+  @media (hover: hover) { .ponuda:not(:disabled):hover { border-color: #4A4A5C; background: var(--povrs); } }
   .ponuda.tacno { border-color: var(--tacno); background: var(--tacno-bg); --boja: var(--tacno); }
   .ponuda.netacno { border-color: var(--netacno); background: var(--netacno-bg); --boja: var(--netacno); }
   .ponuda:disabled:not(.tacno):not(.netacno) { opacity: .4; }
@@ -230,7 +223,7 @@
         <div class="zaklon-info">
           <div class="zaklon-malo" id="zaklonMalo"></div>
           <div class="zaklon-veliko" id="zaklonVeliko">♪</div>
-          <div class="ekvilajzer"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="ekvilajzer"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
       </div>
     </div>
@@ -812,6 +805,39 @@ function renderAnimacija() {
   z.classList.toggle('svira', uIgri() && ytStanje === 1);
   z.classList.toggle('tiho', faza === 'glas' || ui.govori);
 }
+
+// Ekvilajzer: YouTube ne daje pristup samom zvuku, pa se spektar simulira. Basovi (levo)
+// menjaju visinu ređe i skaču više, visoki tonovi (desno) brže i niže, a povremeni
+// "udarac" ritma podigne basove. Svaka traka se diže brzo i spušta polako, kao pravi.
+const trakeEq = [...document.querySelectorAll('.ekvilajzer span')].map((el, i, sve) => ({
+  el, f: i / (sve.length - 1), v: 0.06, cilj: 0.06, sledece: 0,
+}));
+const manjePokreta = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+let sledeciUdarac = 0, udarac = 0;
+function animirajEkvilajzer(sad) {
+  const z = $('zaklon');
+  const svira = z.classList.contains('svira');
+  const jacina = z.classList.contains('tiho') ? 0.4 : 1;
+  if (svira && sad > sledeciUdarac) {
+    udarac = 1;
+    sledeciUdarac = sad + 380 + Math.random() * 300;
+  }
+  udarac *= 0.9;
+  for (const t of trakeEq) {
+    if (!svira) t.cilj = 0.06;
+    else if (manjePokreta.matches) t.cilj = (0.75 - 0.4 * t.f) * jacina; // mirna "slika" spektra
+    else if (sad > t.sledece) {
+      const opseg = 1 - 0.5 * t.f;
+      t.cilj = Math.min(1, (0.12 + Math.random() * 0.8 * opseg + udarac * 0.55 * (1 - t.f) ** 2) * jacina);
+      t.sledece = sad + 55 + (1 - t.f) * 150 + Math.random() * 70;
+    }
+    const pre = t.v;
+    t.v += (t.cilj - t.v) * (t.cilj > t.v ? 0.5 : 0.14);
+    if (Math.abs(t.v - pre) > 0.002) t.el.style.transform = 'scaleY(' + t.v.toFixed(3) + ')';
+  }
+  requestAnimationFrame(animirajEkvilajzer);
+}
+requestAnimationFrame(animirajEkvilajzer);
 
 function renderZaklon() {
   const z = $('zaklon');
