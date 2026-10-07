@@ -332,7 +332,7 @@ let rezim = ['ucenje', 'vezba', 'test'].includes(sacuvano.rezim) ? sacuvano.rezi
 let faza = 'start';   // start | slusanje | glas | ceka | otkriveno | kraj
 let runda = null;     // { red, poz, tacno, odgovoreno, pogresne, preskocene }
 let gen = 0;          // raste pri svakoj promeni kompozicije; poništava zakasnele tajmere
-let ui = { odgovor: false, ponude: [], izabrano: null };
+let ui = { odgovor: false, ponude: [], izabrano: null, najavljeno: false, govori: false };
 
 let player = null, plejerSpreman = false, apiGreska = false, fileGreska = false;
 let ytStanje = -1, t0 = null, proteklo = 0, ucitanoU = 0;
@@ -536,7 +536,7 @@ function sledeca() {
   if (runda.poz >= runda.red.length) { zavrsiRundu(); return; }
   const k = trenutna();
   faza = 'slusanje';
-  ui = { odgovor: false, ponude: [], izabrano: null };
+  ui = { odgovor: false, ponude: [], izabrano: null, najavljeno: false, govori: false };
   t0 = null;
   proteklo = 0;
   ytStanje = -1;
@@ -562,13 +562,14 @@ function krajSlusanja() {
     faza = 'glas';
     ui.odgovor = true;
     renderSve();
+    if (ui.najavljeno) {
+      // Naziv je već izgovoren dugmetom; ako glas još govori, nastavak pokreće njegov kraj.
+      if (!ui.govori) predjiNaSledecuUcenje(g);
+      return;
+    }
+    ui.najavljeno = ui.govori = true;
     utisaj(PODESAVANJA.GLASNOCA_ISPOD_GLASA, g, () => {
-      izgovori(k, g, () => {
-        setTimeout(() => {
-          if (g !== gen) return;
-          utisaj(0, g, () => { try { player.pauseVideo(); } catch (e) { /* ništa */ } sledeca(); });
-        }, PODESAVANJA.PAUZA_POSLE_GLASA_MS);
-      });
+      izgovori(k, g, () => { ui.govori = false; predjiNaSledecuUcenje(g); });
     });
     return;
   }
@@ -576,6 +577,31 @@ function krajSlusanja() {
   faza = 'ceka';
   if (rezim === 'test') pripremiPonude();
   renderSve();
+}
+
+// Učenje: kratka pauza posle glasa, muzika se stiša do kraja i ide sledeća kompozicija.
+function predjiNaSledecuUcenje(g) {
+  setTimeout(() => {
+    if (g !== gen) return;
+    utisaj(0, g, () => { try { player.pauseVideo(); } catch (e) { /* ništa */ } sledeca(); });
+  }, PODESAVANJA.PAUZA_POSLE_GLASA_MS);
+}
+
+// Učenje: naziv odmah, a muzika svira dalje (tiše dok glas govori) do isteka vremena.
+function najaviOdmah() {
+  if (rezim !== 'ucenje' || faza !== 'slusanje' || ui.najavljeno) return;
+  const g = gen;
+  const k = trenutna();
+  ui.najavljeno = ui.govori = true;
+  ui.odgovor = true;
+  renderSve();
+  utisaj(PODESAVANJA.GLASNOCA_ISPOD_GLASA, g, () => {
+    izgovori(k, g, () => {
+      ui.govori = false;
+      if (faza === 'glas') predjiNaSledecuUcenje(g); // vreme je isteklo dok je glas govorio
+      else utisaj(100, g);
+    });
+  });
 }
 
 function pripremiPonude() {
@@ -653,7 +679,7 @@ function napraviDugme(tekst, klasa, akcija) {
 }
 
 const OPISI = {
-  ucenje: () => 'Slušaš ' + PODESAVANJA.UCENJE_SEK + ' sekundi, a onda glas kaže ko je kompozitor i kako se delo zove. Kompozicije idu same, jedna za drugom.',
+  ucenje: () => 'Slušaš ' + PODESAVANJA.UCENJE_SEK + ' sekundi, a onda glas kaže ko je kompozitor i kako se delo zove (ili odmah, dugmetom „Reci naziv odmah“). Kompozicije idu same, jedna za drugom.',
   vezba: () => 'Slušaš ' + PODESAVANJA.VEZBA_SEK + ' sekundi i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“.',
   test: () => 'Slušaš ' + PODESAVANJA.TEST_SEK + ' sekundi i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
 };
@@ -818,7 +844,9 @@ function renderDugmad() {
     el.appendChild(napraviDugme('Znam! Prikaži odgovore', 'primarno', () => krajSlusanja()));
   } else if (faza === 'otkriveno') {
     el.appendChild(napraviDugme(poslednja ? (rezim === 'test' ? 'Vidi rezultat' : 'Završi') : 'Sledeća', 'primarno', sledeca));
-  } else if (faza === 'glas') {
+  } else if (rezim === 'ucenje' && faza === 'slusanje' && !ui.najavljeno) {
+    el.appendChild(napraviDugme('Reci naziv odmah', 'primarno', najaviOdmah));
+  } else if (faza === 'glas' || (rezim === 'ucenje' && faza === 'slusanje')) {
     el.appendChild(napraviDugme(poslednja ? 'Završi' : 'Sledeća', '', sledeca));
   }
 }
