@@ -655,7 +655,7 @@ function napraviDugme(tekst, klasa, akcija) {
 const OPISI = {
   ucenje: () => 'Slušaš ' + PODESAVANJA.UCENJE_SEK + ' sekundi, a onda glas kaže ko je kompozitor i kako se delo zove. Kompozicije idu same, jedna za drugom.',
   vezba: () => 'Slušaš ' + PODESAVANJA.VEZBA_SEK + ' sekundi i pokušaš da se setiš. Kad prepoznaš (i pre isteka vremena), klikni „Otkrij odgovor“.',
-  test: () => 'Slušaš ' + PODESAVANJA.TEST_SEK + ' sekundi i biraš jedan od četiri odgovora. Na kraju dobijaš rezultat.',
+  test: () => 'Slušaš ' + PODESAVANJA.TEST_SEK + ' sekundi i biraš jedan od četiri odgovora (ako znaš ranije, klikni „Znam!“). Na kraju dobijaš rezultat.',
 };
 
 function renderStart() {
@@ -813,6 +813,9 @@ function renderDugmad() {
   if (rezim === 'vezba' && (faza === 'slusanje' || faza === 'ceka')) {
     // Dostupno i dok muzika svira: ko odmah prepozna, ne mora da čeka kraj odbrojavanja.
     el.appendChild(napraviDugme('Otkrij odgovor', 'primarno', otkrij));
+  } else if (rezim === 'test' && faza === 'slusanje') {
+    // Ko prepozna ranije, odmah prelazi na ponude (klip staje kao kad istekne vreme).
+    el.appendChild(napraviDugme('Znam! Prikaži odgovore', 'primarno', () => krajSlusanja()));
   } else if (faza === 'otkriveno') {
     el.appendChild(napraviDugme(poslednja ? (rezim === 'test' ? 'Vidi rezultat' : 'Završi') : 'Sledeća', 'primarno', sledeca));
   } else if (faza === 'glas') {
